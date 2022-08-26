@@ -1,126 +1,235 @@
-jQuery(document).ready(function($){
-	//update these values if you change these breakpoints in the style.css file (or _layout.scss if you use SASS)
-	var MqM= 768,
-		MqL = 1024;
+/**
+* Template Name: Moderna - v4.9.1
+* Template URL: https://bootstrapmade.com/free-bootstrap-template-corporate-moderna/
+* Author: BootstrapMade.com
+* License: https://bootstrapmade.com/license/
+*/
+(function() {
+  "use strict";
 
-	var faqsSections = $('.cd-faq-group'),
-		faqTrigger = $('.cd-faq-trigger'),
-		faqsContainer = $('.cd-faq-items'),
-		faqsCategoriesContainer = $('.cd-faq-categories'),
-		faqsCategories = faqsCategoriesContainer.find('a'),
-		closeFaqsContainer = $('.cd-close-panel');
-	
-	//select a faq section 
-	faqsCategories.on('click', function(event){
-		event.preventDefault();
-		var selectedHref = $(this).attr('href'),
-			target= $(selectedHref);
-		if( $(window).width() < MqM) {
-			faqsContainer.scrollTop(0).addClass('slide-in').children('ul').removeClass('selected').end().children(selectedHref).addClass('selected');
-			closeFaqsContainer.addClass('move-left');
-			$('body').addClass('cd-overlay');
-		} else {
-	        $('body,html').animate({ 'scrollTop': target.offset().top - 19}, 200); 
-		}
-	});
+  /**
+   * Easy selector helper function
+   */
+  const select = (el, all = false) => {
+    el = el.trim()
+    if (all) {
+      return [...document.querySelectorAll(el)]
+    } else {
+      return document.querySelector(el)
+    }
+  }
 
-	//close faq lateral panel - mobile only
-	$('body').bind('click touchstart', function(event){
-		if( $(event.target).is('body.cd-overlay') || $(event.target).is('.cd-close-panel')) { 
-			closePanel(event);
-		}
-	});
-	faqsContainer.on('swiperight', function(event){
-		closePanel(event);
-	});
+  /**
+   * Easy event listener function
+   */
+  const on = (type, el, listener, all = false) => {
+    let selectEl = select(el, all)
+    if (selectEl) {
+      if (all) {
+        selectEl.forEach(e => e.addEventListener(type, listener))
+      } else {
+        selectEl.addEventListener(type, listener)
+      }
+    }
+  }
 
-	//show faq content clicking on faqTrigger
-	faqTrigger.on('click', function(event){
-		event.preventDefault();
-		$(this).next('.cd-faq-content').slideToggle(200).end().parent('li').toggleClass('content-visible');
-	});
+  /**
+   * Easy on scroll event listener 
+   */
+  const onscroll = (el, listener) => {
+    el.addEventListener('scroll', listener)
+  }
 
-	//update category sidebar while scrolling
-	$(window).on('scroll', function(){
-		if ( $(window).width() > MqL ) {
-			(!window.requestAnimationFrame) ? updateCategory() : window.requestAnimationFrame(updateCategory); 
-		}
-	});
+  /**
+   * Scrolls to an element with header offset
+   */
+  const scrollto = (el) => {
+    let header = select('#header')
+    let offset = header.offsetHeight
 
-	$(window).on('resize', function(){
-		if($(window).width() <= MqL) {
-			faqsCategoriesContainer.removeClass('is-fixed').css({
-				'-moz-transform': 'translateY(0)',
-			    '-webkit-transform': 'translateY(0)',
-				'-ms-transform': 'translateY(0)',
-				'-o-transform': 'translateY(0)',
-				'transform': 'translateY(0)',
-			});
-		}	
-		if( faqsCategoriesContainer.hasClass('is-fixed') ) {
-			faqsCategoriesContainer.css({
-				'left': faqsContainer.offset().left,
-			});
-		}
-	});
+    if (!header.classList.contains('header-scrolled')) {
+      offset -= 20
+    }
 
-	function closePanel(e) {
-		e.preventDefault();
-		faqsContainer.removeClass('slide-in').find('li').show();
-		closeFaqsContainer.removeClass('move-left');
-		$('body').removeClass('cd-overlay');
-	}
+    let elementPos = select(el).offsetTop
+    window.scrollTo({
+      top: elementPos - offset,
+      behavior: 'smooth'
+    })
+  }
 
-	function updateCategory(){
-		updateCategoryPosition();
-		updateSelectedCategory();
-	}
+  /**
+   * Toggle .header-scrolled class to #header when page is scrolled
+   */
+  let selectHeader = select('#header')
+  if (selectHeader) {
+    const headerScrolled = () => {
+      if (window.scrollY > 100) {
+        selectHeader.classList.add('header-scrolled')
+      } else {
+        selectHeader.classList.remove('header-scrolled')
+      }
+    }
+    window.addEventListener('load', headerScrolled)
+    onscroll(document, headerScrolled)
+  }
 
-	function updateCategoryPosition() {
-		var top = $('.cd-faq').offset().top,
-			height = jQuery('.cd-faq').height() - jQuery('.cd-faq-categories').height(),
-			margin = 20;
-		if( top - margin <= $(window).scrollTop() && top - margin + height > $(window).scrollTop() ) {
-			var leftValue = faqsCategoriesContainer.offset().left,
-				widthValue = faqsCategoriesContainer.width();
-			faqsCategoriesContainer.addClass('is-fixed').css({
-				'left': leftValue,
-				'top': margin,
-				'-moz-transform': 'translateZ(0)',
-			    '-webkit-transform': 'translateZ(0)',
-				'-ms-transform': 'translateZ(0)',
-				'-o-transform': 'translateZ(0)',
-				'transform': 'translateZ(0)',
-			});
-		} else if( top - margin + height <= $(window).scrollTop()) {
-			var delta = top - margin + height - $(window).scrollTop();
-			faqsCategoriesContainer.css({
-				'-moz-transform': 'translateZ(0) translateY('+delta+'px)',
-			    '-webkit-transform': 'translateZ(0) translateY('+delta+'px)',
-				'-ms-transform': 'translateZ(0) translateY('+delta+'px)',
-				'-o-transform': 'translateZ(0) translateY('+delta+'px)',
-				'transform': 'translateZ(0) translateY('+delta+'px)',
-			});
-		} else { 
-			faqsCategoriesContainer.removeClass('is-fixed').css({
-				'left': 0,
-				'top': 0,
-			});
-		}
-	}
+  /**
+   * Back to top button
+   */
+  let backtotop = select('.back-to-top')
+  if (backtotop) {
+    const toggleBacktotop = () => {
+      if (window.scrollY > 100) {
+        backtotop.classList.add('active')
+      } else {
+        backtotop.classList.remove('active')
+      }
+    }
+    window.addEventListener('load', toggleBacktotop)
+    onscroll(document, toggleBacktotop)
+  }
 
-	function updateSelectedCategory() {
-		faqsSections.each(function(){
-			var actual = $(this),
-				margin = parseInt($('.cd-faq-title').eq(1).css('marginTop').replace('px', '')),
-				activeCategory = $('.cd-faq-categories a[href="#'+actual.attr('id')+'"]'),
-				topSection = (activeCategory.parent('li').is(':first-child')) ? 0 : Math.round(actual.offset().top);
-			
-			if ( ( topSection - 20 <= $(window).scrollTop() ) && ( Math.round(actual.offset().top) + actual.height() + margin - 20 > $(window).scrollTop() ) ) {
-				activeCategory.addClass('selected');
-			}else {
-				activeCategory.removeClass('selected');
-			}
-		});
-	}
-});
+  /**
+   * Mobile nav toggle
+   */
+  on('click', '.mobile-nav-toggle', function(e) {
+    select('#navbar').classList.toggle('navbar-mobile')
+    this.classList.toggle('bi-list')
+    this.classList.toggle('bi-x')
+  })
+
+  /**
+   * Mobile nav dropdowns activate
+   */
+  on('click', '.navbar .dropdown > a', function(e) {
+    if (select('#navbar').classList.contains('navbar-mobile')) {
+      e.preventDefault()
+      this.nextElementSibling.classList.toggle('dropdown-active')
+    }
+  }, true)
+
+  /**
+   * Scrool with ofset on links with a class name .scrollto
+   */
+  on('click', '.scrollto', function(e) {
+    if (select(this.hash)) {
+      e.preventDefault()
+
+      let navbar = select('#navbar')
+      if (navbar.classList.contains('navbar-mobile')) {
+        navbar.classList.remove('navbar-mobile')
+        let navbarToggle = select('.mobile-nav-toggle')
+        navbarToggle.classList.toggle('bi-list')
+        navbarToggle.classList.toggle('bi-x')
+      }
+      scrollto(this.hash)
+    }
+  }, true)
+
+  /**
+   * Skills animation
+   */
+  let skilsContent = select('.skills-content');
+  if (skilsContent) {
+    new Waypoint({
+      element: skilsContent,
+      offset: '80%',
+      handler: function(direction) {
+        let progress = select('.progress .progress-bar', true);
+        progress.forEach((el) => {
+          el.style.width = el.getAttribute('aria-valuenow') + '%'
+        });
+      }
+    })
+  }
+
+  /**
+   * Testimonials slider
+   */
+  new Swiper('.testimonials-carousel', {
+    speed: 400,
+    loop: true,
+    autoplay: {
+      delay: 5000,
+      disableOnInteraction: false
+    },
+    pagination: {
+      el: '.swiper-pagination',
+      type: 'bullets',
+      clickable: true
+    }
+  });
+
+  /**
+   * Porfolio isotope and filter
+   */
+  window.addEventListener('load', () => {
+    let portfolioContainer = select('.portfolio-container');
+    if (portfolioContainer) {
+      let portfolioIsotope = new Isotope(portfolioContainer, {
+        itemSelector: '.portfolio-wrap',
+        layoutMode: 'fitRows'
+      });
+
+      let portfolioFilters = select('#portfolio-flters li', true);
+
+      on('click', '#portfolio-flters li', function(e) {
+        e.preventDefault();
+        portfolioFilters.forEach(function(el) {
+          el.classList.remove('filter-active');
+        });
+        this.classList.add('filter-active');
+
+        portfolioIsotope.arrange({
+          filter: this.getAttribute('data-filter')
+        });
+        portfolioIsotope.on('arrangeComplete', function() {
+          AOS.refresh()
+        });
+      }, true);
+    }
+
+  });
+
+  /**
+   * Initiate portfolio lightbox 
+   */
+  const portfolioLightbox = GLightbox({
+    selector: '.portfolio-lightbox'
+  });
+
+  /**
+   * Portfolio details slider
+   */
+  new Swiper('.portfolio-details-slider', {
+    speed: 400,
+    autoplay: {
+      delay: 5000,
+      disableOnInteraction: false
+    },
+    pagination: {
+      el: '.swiper-pagination',
+      type: 'bullets',
+      clickable: true
+    }
+  });
+
+  /**
+   * Animation on scroll
+   */
+  window.addEventListener('load', () => {
+    AOS.init({
+      duration: 1000,
+      easing: "ease-in-out",
+      once: true,
+      mirror: false
+    });
+  });
+
+  /**
+   * Initiate Pure Counter 
+   */
+  new PureCounter();
+
+})()
